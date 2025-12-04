@@ -4,7 +4,7 @@ import { ArrowLeft, Copy, Check, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import expressLogo from "@/assets/express-bilar-logo.png";
+import gothiaLogo from "@/assets/gothia-bil-logo.png";
 
 interface FormData {
   brand: string;
@@ -18,7 +18,6 @@ interface FormData {
 
 interface LocationState {
   formData: FormData;
-  apiKey: string;
   systemPrompt: string;
 }
 
@@ -41,7 +40,6 @@ const AnnonsResultat = () => {
       const response = await supabase.functions.invoke("generate-ad", {
         body: {
           formData: state.formData,
-          apiKey: state.apiKey,
           systemPrompt: state.systemPrompt,
         },
       });
@@ -122,7 +120,7 @@ const AnnonsResultat = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <img src={expressLogo} alt="Express Bilar" className="h-10" />
+          <img src={gothiaLogo} alt="GothiaBil" className="h-10" />
         </div>
 
         {/* Title */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Car, Settings, Loader2 } from "lucide-react";
+import { ArrowLeft, Car, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,7 +86,6 @@ Annonsen ska vara:
 
 const AnnonsGenerator = () => {
   const navigate = useNavigate();
-  const [apiKey, setApiKey] = useState("");
   const [selectedTone, setSelectedTone] = useState<ToneType>("professional");
   const [systemPrompt, setSystemPrompt] = useState(TONE_OPTIONS[0].prompt);
   const [formData, setFormData] = useState<FormData>({
@@ -101,11 +100,9 @@ const AnnonsGenerator = () => {
 
   // Load saved settings from localStorage
   useEffect(() => {
-    const savedApiKey = localStorage.getItem("openai_api_key");
     const savedTone = localStorage.getItem("ad_tone") as ToneType | null;
     const savedPrompt = localStorage.getItem("ad_system_prompt");
     
-    if (savedApiKey) setApiKey(savedApiKey);
     if (savedTone && TONE_OPTIONS.find(t => t.id === savedTone)) {
       setSelectedTone(savedTone);
       const toneOption = TONE_OPTIONS.find(t => t.id === savedTone);
@@ -115,12 +112,6 @@ const AnnonsGenerator = () => {
     }
     if (savedPrompt) setSystemPrompt(savedPrompt);
   }, []);
-
-  // Save API key when changed
-  const handleApiKeyChange = (value: string) => {
-    setApiKey(value);
-    localStorage.setItem("openai_api_key", value);
-  };
 
   // Handle tone change
   const handleToneChange = (tone: ToneType) => {
@@ -153,20 +144,10 @@ const AnnonsGenerator = () => {
       return;
     }
 
-    if (!apiKey) {
-      toast({
-        title: "API-nyckel saknas",
-        description: "Ange din OpenAI API-nyckel i inställningarna",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Navigate to results page with form data
     navigate("/annons-resultat", {
       state: {
         formData,
-        apiKey,
         systemPrompt,
       },
     });
@@ -208,21 +189,6 @@ const AnnonsGenerator = () => {
               </h2>
               
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="apiKey">OpenAI API-nyckel *</Label>
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    placeholder="sk-..."
-                    value={apiKey}
-                    onChange={(e) => handleApiKeyChange(e.target.value)}
-                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Sparas lokalt i din webbläsare
-                  </p>
-                </div>
-                
                 <div className="space-y-2">
                   <Label htmlFor="prompt">System Prompt</Label>
                   <Textarea

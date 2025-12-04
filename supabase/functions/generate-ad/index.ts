@@ -1,6 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -18,7 +20,6 @@ interface FormData {
 
 interface RequestBody {
   formData: FormData;
-  apiKey: string;
   systemPrompt: string;
 }
 
@@ -29,14 +30,15 @@ serve(async (req) => {
   }
 
   try {
-    const { formData, apiKey, systemPrompt } = (await req.json()) as RequestBody;
+    const { formData, systemPrompt } = (await req.json()) as RequestBody;
 
     console.log("Generating ad for:", formData.brand, formData.model);
 
-    if (!apiKey) {
+    if (!openAIApiKey) {
+      console.error("OPENAI_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "API-nyckel saknas" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "API-nyckel är inte konfigurerad på servern" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -60,7 +62,7 @@ Generera en professionell och säljande annons baserat på denna information.`;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -80,7 +82,7 @@ Generera en professionell och säljande annons baserat på denna information.`;
       
       if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: "Ogiltig API-nyckel. Kontrollera din OpenAI API-nyckel." }),
+          JSON.stringify({ error: "Ogiltig API-nyckel. Kontakta administratören." }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
